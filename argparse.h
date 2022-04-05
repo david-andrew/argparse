@@ -62,11 +62,62 @@ int argparse_register_int(char* long_name, char short_name, bool required, int d
     return __argparse_count++;
 }
 
-int argparse_register_str(){}
+int argparse_register_str()
+{}
 
-int argparse_register_flag(){}
+int argparse_register_flag()
+{}
 
-void argparse_parse_args(){}
+void argparse_parse_args(int argc, char** argv)
+{
+    for (int i = 0; i < __argparse_count; i++) 
+    {
+        __arg_t arg = __argparse_args[i];
+        //TODO
+        //for (int j = 0; j < argc; j++)
+        //{
+        //    if matches short/long name, 
+        //        update value based on type
+        //        switch (arg.type)
+        //            case __int_t: arg.value.i = atoi(argv[j]); break;
+        //            case __str_t: arg.value.s = argv[j]; break;
+        //            case __float_t: arg.value.f = strtod(argv[j]); break;
+        //}
+    }
+}
+
+int argparse_get_int_by_str(char* long_name)
+{
+    for (int i = 0; i < __argparse_count; i++) 
+    {
+        __arg_t arg = __argparse_args[i];
+        if (arg.long_name != NULL && strcmp(long_name, arg.long_name) == 0)
+        {
+            return arg.value.i;
+        }
+    }
+    printf("ERROR: unable to find argument --%s\n", long_name);
+    exit(1);
+}
+
+int argparse_get_int_by_char(char short_name)
+{
+    for (int i = 0; i < __argparse_count; i++) 
+    {
+        __arg_t arg = __argparse_args[i];
+        if (arg.short_name != 0 && short_name == arg.short_name)
+        {
+            return arg.value.i;
+        }
+    }
+    printf("ERROR: unable to find argument -%c\n", short_name);
+    exit(1);
+}
+
+int argparse_get_int_by_id(int i)
+{
+    return __argparse_args[i].value.i;
+}
 
 void argparse_print_help(char* prog_name)
 {
