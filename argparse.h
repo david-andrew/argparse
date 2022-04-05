@@ -21,7 +21,6 @@ typedef enum {
     __int_t,
     __float_t,
     __str_t,
-    // bool_t;
     __flag_t,
 } __argtype_t;
 
@@ -38,6 +37,7 @@ typedef struct {
     } value;
     char* help;
 } __arg_t;
+
 
 #define __MAX_ARGS 32 //change if need more arguments
 __arg_t __argparse_args[__MAX_ARGS];
@@ -86,37 +86,39 @@ void argparse_parse_args(int argc, char** argv)
     }
 }
 
-int argparse_get_int_by_str(char* long_name)
+int __argparse_get_idx_by_name(char* long_name, char short_name)
 {
+    if (long_name == NULL && short_name == 0)
+    {
+        printf("ERROR: at least long_name, or short_name must be provided\n");
+        exit(1);
+    }
     for (int i = 0; i < __argparse_count; i++) 
     {
         __arg_t arg = __argparse_args[i];
-        if (arg.long_name != NULL && strcmp(long_name, arg.long_name) == 0)
+        if ((arg.short_name != 0 && short_name == arg.short_name) ||
+            (long_name != NULL && arg.long_name != NULL && strcmp(long_name, arg.long_name) == 0))
         {
-            return arg.value.i;
+            return i;
         }
     }
-    printf("ERROR: unable to find argument --%s\n", long_name);
+    if (long_name != NULL)
+        printf("ERROR: unable to find argument --%s\n", long_name);
+    else
+        printf("ERROR: unable to find argument -%c\n", short_name);
     exit(1);
 }
-
-int argparse_get_int_by_char(char short_name)
+int argparse_get_int_by_id(int i) { return __argparse_args[i].value.i; }
+char* argparse_get_str_by_id(int i) { return __argparse_args[i].value.s; }
+int argparse_get_int_by_name(char* long_name, char short_name)
 {
-    for (int i = 0; i < __argparse_count; i++) 
-    {
-        __arg_t arg = __argparse_args[i];
-        if (arg.short_name != 0 && short_name == arg.short_name)
-        {
-            return arg.value.i;
-        }
-    }
-    printf("ERROR: unable to find argument -%c\n", short_name);
-    exit(1);
+    int i = __argparse_get_idx_by_name(long_name, short_name);
+    return argparse_get_int_by_id(i);
 }
-
-int argparse_get_int_by_id(int i)
+char* argparse_get_str_by_name(char* long_name, char short_name)
 {
-    return __argparse_args[i].value.i;
+    int i = __argparse_get_idx_by_name(long_name, short_name);
+    return argparse_get_str_by_id(i);
 }
 
 void argparse_print_help(char* prog_name)
